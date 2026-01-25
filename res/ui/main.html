@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="contentContainer"></div>
+<br>
+<button onclick='submit()'>确定</button>
+<button onclick='wxclose()'>退出</button>
+<script type="text/javascript">
+    window.onload = function () {
+        ascript.call('ready', true)
+    }
+
+    function wxclose() {
+        console.log('点击关闭')
+        ascript.close()
+    }
+
+    function submit() {
+        const checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+
+        // 2. 按 name 分组：创建空对象存储分组数据
+        const groupedData = {};
+
+        // 3. 遍历选中的多选框，按 name 分组存入值
+        [...checkedCheckboxes].forEach(checkbox => {
+            const groupName = checkbox.name; // 获取分组名（name 属性）
+            const value = checkbox.value;    // 获取选中值
+
+            // 若该分组已存在，往数组中添加值；否则创建新数组
+            if (groupedData[groupName]) {
+                groupedData[groupName].push(value);
+            } else {
+                groupedData[groupName] = [value];
+            }
+        });
+
+        // 4. 转换为 JSON 字符串（indent=2 格式化输出，便于阅读）
+        const jsonResult = JSON.stringify(groupedData, null, 2);
+
+        // 5. 展示结果
+        console.log("按 name 分组的 JSON：", jsonResult);
+        ascript.call('submit', jsonResult)
+    }
+
+    function senddata(str) {
+        console.log('senddata', str)
+        nestedObj = JSON.parse(str);
+        console.log('senddata' + typeof(nestedObj))
+        for (const item of Object.values(nestedObj)) {
+            const container = document.getElementById("contentContainer");
+            console.log('item.name' + item.name + 'container' + container)
+            // 2. 添加文字（创建 p 标签，设置文字内容）
+            const textElement = document.createElement("p");
+            textElement.textContent = item.name; // 文字内容
+            textElement.style.fontSize = "28px"; // 可选：设置样式（字体大小）
+            container.appendChild(textElement); // 挂载到容器
+            i = 0;
+            item.step.forEach(item2 => {
+                // 创建多选框（input 类型为 checkbox）
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox"; // 类型：多选框
+                checkbox.name = item.name; // 同一组多选框 name 需相同（便于后续获取值）
+                checkbox.value = item2.name; // 多选框的值（提交时传递）
+                // checkbox.checked = true; // 默认选中
+                checkbox.id = 'checkbox-${item.value}'; // 唯一 ID（用于关联 label）
+                checkbox.style.width = "25px"
+                checkbox.style.height = "25px"
+                container.appendChild(checkbox);
+
+                // 创建标签（label）：点击文字也能选中多选框，提升体验
+                const label = document.createElement("label");
+                label.htmlFor = checkbox.id; // 关联多选框的 ID
+                label.textContent = item2.name; // 标签文字
+                label.style.fontSize = "22px"
+                //label.style.marginRight = "28px"; // 可选：设置样式（右边距）
+                container.appendChild(label);
+                i = i + 1
+                if(i%2==0){
+                    const br = document.createElement("br");
+                    container.appendChild(br);
+                }
+            });
+            const br = document.createElement("br");
+            container.appendChild(br);
+        }
+    }
+</script>
+</body>
+</html>
