@@ -59,7 +59,7 @@ def genCheckList(cfg) :
     text = name
     check = "|".join('<input type="checkbox" id="checkbox">' + item['name'] for item in step)
 
-    return '<br />' + text + '<br />' +  check + '<br />'
+    return '<br />' + text + '<br />' +  check
 
 def genCheckValue(cfg) :
     name = cfg['name']
@@ -68,7 +68,7 @@ def genCheckValue(cfg) :
     text = name
     check = "|".join('<input type="checkbox id=' + item['name'] + '>' + item['name'] for item in step)
 
-    return '<br />' + text + '<br />' +  check + '<br />'
+    return '<br />' + text + '<br />' +  check
 def cfg(cfgList) :
     checklist = ''
     i = 0
@@ -107,19 +107,60 @@ def submit(v):
     w.close()
 
     result_dict = json.loads(v)
+    print('result_dict', result_dict)
     process(result_dict)
 
+def mission(v):
+    print('mission', v)
 
+    global w
+    w.close()
+
+    result_dict = json.loads("""{
+  "抖音极速版": [
+    "看广告",
+    "逛街",
+    "双倍奖励",
+    "指定视频",
+    "开宝箱",
+    "吃饭打卡",
+    "看视频"
+  ],
+  "喜番短剧": [
+    "领金币"
+  ]
+}""")
+    print('result_dict', result_dict)
+    process(result_dict)
+
+def qiandao(v):
+    print('qiandao', v)
+
+    global w
+    w.close()
+
+    result_dict = json.loads("""{
+  "快手": [
+    "签到"
+  ],
+  "抖音极速版": [
+    "签到"
+  ]
+}""")
+    print('qiandao result_dict', result_dict)
+    process(result_dict)
 def tunnel(k,v):
-    print(k)
-    print(v)
+    print('k',k)
+    print('v',v)
 
     if k == 'ready' :
         ready()
     elif k == 'submit' :
         submit(v)
-
-
+    elif k == 'mission' :
+        mission(v)
+    elif k == 'qiandao' :
+        qiandao(v)
 
 w = None
 cfgList = None

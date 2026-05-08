@@ -18,6 +18,7 @@ from ascript.android import system
 # 环境设备相关
 from ascript.android.system import R, Device
 
+
 import math
 import time
 
@@ -81,6 +82,7 @@ def findTextAndClick(keyword, delay=5):
 
 def findText(keyword, delay=5):
     print('findText' + keyword)
+    keyword = keyword.replace('\\\\', '\\')
     for _ in range(delay):
         node = Selector().text(keyword).find()
 
@@ -144,13 +146,18 @@ def findTextEndAndClick(keyword, end, delay=5):
 
 
 def swipeBackOnes():
-    action.slide(1060 + math.floor(random() * 11) - 5, 500 + math.floor(random() * 11) - 5,
-                 800 + math.floor(random() * 11) - 5, 550 + math.floor(random() * 11) - 5, randint(300, 500))
-
+    d = Device.display()
+    weight = d.widthPixels
+    action.slide(weight - 2 - math.floor(random() * 5), 500 + math.floor(random() * 11) - 5,
+                 weight - 260 + math.floor(random() * 11) - 5, 550 + math.floor(random() * 11) - 5,
+                 300 + random() * 200)
 def swipeBackCount(count):
     for _ in range(count):
-        action.slide(1060 + math.floor(random() * 11) - 5, 500 + math.floor(random() * 11) - 5,
-                 800 + math.floor(random() * 11) - 5, 550 + math.floor(random() * 11) - 5, randint(300, 500))
+        d = Device.display()
+        weight = d.widthPixels
+        action.slide(weight - 2 - math.floor(random() * 5), 500 + math.floor(random() * 11) - 5,
+                     weight - 260 + math.floor(random() * 11) - 5, 550 + math.floor(random() * 11) - 5,
+                     300 + random() * 200)
         time.sleep(0.2 + random() / 2)
 
 
@@ -182,6 +189,7 @@ def swipeBack(to, type='ocr'):
     y = None
     count = 0
     time.sleep(2 + random() / 2)
+
     while True:
         if type == 'ocr':
             x, y = ocrFind(to)
@@ -191,8 +199,12 @@ def swipeBack(to, type='ocr'):
             x, y = textFind(to)
         if x is not None:
             break
-        action.slide(1060 + math.floor(random() * 11) - 5, 500 + math.floor(random() * 11) - 5,
-                     800 + math.floor(random() * 11) - 5, 550 + math.floor(random() * 11) - 5, 300 + random() * 200)
+        d = Device.display()
+        weight = d.widthPixels
+        action.slide(weight - 2 - math.floor(random() * 5), 500 + math.floor(random() * 11) - 5,
+                     weight - 260 + math.floor(random() * 11) - 5, 550 + math.floor(random() * 11) - 5,
+                     300 + random() * 200)
+
         time.sleep(2 + random() / 2)
         count += 1
         if count > 3:
@@ -227,9 +239,22 @@ def swipeUp(low=0.2, high=0.7):
     # print('swipe', startX, startY, endX, endY, t)
 
 
-def swipeDown():
-    action.slide(500 + math.floor(random() * 11) - 5, 1300 + math.floor(random() * 11) - 5,
-                 500 + math.floor(random() * 11) - 5, 1600 + math.floor(random() * 11) - 5, 200 + randint(0, 100))
+def swipeDown(low=0.2, high=0.7):
+    size = Device.display()
+    width = int(size.widthPixels * 0.5)
+    startX = randint(width - 10, width + 10)
+    endY = randint(int(size.heightPixels * high) - 10, int(size.heightPixels * high) + 10)
+    endX = randint(width + 10, width + 20)
+    startY = randint(int(size.heightPixels * low) - 10, int(size.heightPixels * low) + 10)
+    # action.slide(500 + randint(0, 100), 1800 + randint(0, 100),
+    #              500 + randint(0, 100), 1100 + randint(0, 100), 200 + randint(100, 200))
+
+    # action.slide(startX, startY, startX, startY - 100, randint(95, 105))
+    # action.slide(startX, startY-100, startX, startY-300, randint(95, 105))
+    # action.slide(startX, startY - 300, startX, endY, randint(95, 105))
+    t = randint(200, 220)
+    action.slide(startX, startY, endX, endY, t)
+    # print('swipe', startX, startY, endX, endY, t)
 
 
 def swipes(sec=15):
@@ -249,14 +274,22 @@ def swipes(sec=15):
 
 
 def textFind(text):
+    text = text.replace('\\\\', '\\')
     node = Selector().text(text).find()
     if node:
         return node.rect.centerX(), node.rect.centerY()
     else:
         return None, None
 
+def idFind(text):
+    node = Selector().id(text).find()
+    if node:
+        return node.rect.centerX(), node.rect.centerY()
+    else:
+        return None, None
 
 def descFind(text):
+    text = text.replace('\\\\', '\\')
     node = Selector().desc(text).find()
     if node:
         return node.rect.centerX(), node.rect.centerY()
@@ -272,6 +305,7 @@ def pathFind(text):
     else:
         print('pathFind not find', text)
         return None, None
+
 def imageFind(text, confidence=0.9):
     res = FindImages.find_template([R.img(text), ], confidence=confidence)
     if res:
@@ -380,18 +414,18 @@ def getJinBi(paras):
         print('end')
 
 
-def lookShortVideo(paras, x, y):
+def lookShortVideo(paras, x, y, low = 3, up = 5):
     time.sleep(3)
     print('lookShortVideo')
 
     before = getJinBi(paras)
     count = 0
     for _ in range(2):
-        time.sleep(randint(10, 20))
+        time.sleep(randint(low, up))
         after = getJinBi(paras)
         if after is None:
             # time.sleep(5)
-            swipeUp()
+            swipeUp(0.2,0.6)
 
             continue
         print('lookShortVideo', before, after, count)
@@ -427,7 +461,7 @@ def register(cfg):
 def findPath(step, name):
     path = step['path']
     for it in path:
-        type, value = it.split(':')
+        type, value = it.split(':',1)
         time.sleep(1+random())
         x,y = findPosSingle(type, value)
         if x is not None:
@@ -464,7 +498,7 @@ def procSingle(cfgName, check):
     steps = cfg['step']
     nodes = cfg['node']
     name = cfg['name']
-    for i in range(2):
+    for i in range(1):
 
         for step in steps:
             if i < 2 and step['name'] not in check:
@@ -478,7 +512,7 @@ def procSingle(cfgName, check):
                 nodeList = nodes[step['name']]
                 print('nodeList', nodeList)
                 for it in nodeList:
-                    time.sleep(4+random())
+                    time.sleep(3+random())
                     x, y = findPos(it, name, step)
                     if x is not None:
                         clickXY(x, y)
@@ -507,6 +541,9 @@ def procSingle(cfgName, check):
 
                     else:
                         break
+                    for _ in range(3):
+                        swipeDown(0.2, 0.7)
+                        time.sleep(2)
 
     swipeBackCount(5)
                 # if find:
@@ -518,12 +555,16 @@ def procSingle(cfgName, check):
 def findPosSingle(type, text):
     x = None
     y = None
+    print('findPosSingle', type, text)
     if 'text' in type:
         x, y = textFind(text)
     elif 'desc' in type:
         x, y = descFind(text)
     elif 'path' in type:
         x, y = pathFind(text)
+    elif 'id' in type:
+        x, y = idFind(text)
+        print('findPosSingle', x, y)
     # elif 'image' == type:
     #     print(step['name'] + '/' + it['image'])
     #     x, y = imageFind(name + '/' + it['image'] + '.png')
@@ -543,13 +584,15 @@ def findPos(it, name, step):
     swipeDown()
     time.sleep(3)
 
-    for _ in range(2):
+    for _ in range(6):
         if 'text' in it:
             x, y = findPosSingle('text', it['text'])
         elif 'desc' in it:
             x, y = findPosSingle('desc',it['desc'])
         elif 'path' in it:
             x, y = findPosSingle('path',it['path'])
+        elif 'id' in it:
+            x, y = findPosSingle('path',it['id'])
         elif 'image' in it:
             print(step['name'] + '/' + it['image'])
             x, y = imageFind(name + '/' + it['image'] + '.png')
@@ -557,7 +600,7 @@ def findPos(it, name, step):
             for _ in range(2):
                 text = it['ocr'].replace('\\\\','\\')
                 x, y = findPosSingle('ocr', r''+text)
-                print('findPos', text, x)
+                print('findPos', text, x, y)
                 if x is not None:
                     return x, y
             ocrFindText(None)
@@ -594,9 +637,9 @@ def process(check):
     # while True:
     #     swipeUp()
     #     time.sleep(randint(60, 100))
-
+    # Ocr.set_engine("mlkit")
     print(procList, check)
-    for _ in range(10):
+    for _ in range(100):
         for cfg in procList:
             print('cfg', cfg, 'check', check)
             if cfg in check:

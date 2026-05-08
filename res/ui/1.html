@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<br />抖音极速版<br /><input type="checkbox" id="checkbox">看视频|<input type="checkbox" id="checkbox">赚钱<br /><br />红果<br /><input type="checkbox" id="checkbox">看视频|<input type="checkbox" id="checkbox">看视频<br />
+<button onclick='submit()'>确定</button>
+<button onclick='wxclose()'>退出</button>
+<script type="text/javascript">
+    function wxclose() {
+        console.log('点击关闭')
+        ascript.close()
+    }
+    function submit() {
+        var tmp = document.getElementById('check')
+        console.log(tmp)
+    }
+</script>
+</body>
+</html>

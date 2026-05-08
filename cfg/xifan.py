@@ -10,8 +10,8 @@ from ..util import swipeUp, swipe, register, forWait, clickNodeP, lookGuangGao, 
 from ascript.android.screen import capture, FindColors, FindImages, Ocr
 from ascript.android.system import R
 
-WAIT_LOW = 30
-WAIT_HIGH = 40
+WAIT_LOW = 20
+WAIT_HIGH = 30
 
 def jinBiPos():
     print("金币位置检测")
@@ -59,6 +59,7 @@ def lookXiFanGuangGao(paras, x, y):
 def procKeyword():
     keyword = list()
     keyword.append('点击')
+    keyword.append('立即')
     keyword.append('打开')
     keyword.append('下载')
     keyword.append('充值')
@@ -75,6 +76,8 @@ def procKeyword():
     keyword.append('一键')
     keyword.append('速来')
     keyword.append('抢先')
+    keyword.append('领金币')
+    keyword.append('放弃')
     for it in keyword:
         x, _ = findWaitBack(it, 's后|已成功', 'text')
         if x is not None:
@@ -88,7 +91,7 @@ def lookGuangGaoOnes(paras, x, y):
         time.sleep(2 + random())
         clickXY(x, y)
 
-    time.sleep(3 + random())
+    time.sleep(12 + random())
     text = findText("s后")
     print('s后', text)
     if text is not None:
@@ -99,11 +102,19 @@ def lookGuangGaoOnes(paras, x, y):
         time.sleep(t)
         swipeBackOnes()
 
+
     time.sleep(3 + random())
-    x, y = textFind("继续观看")
+    x, y = textFind("继续观看|换个|翻倍")
     print('继续观看', x)
     if x is not None:
         clickXY(x, y)
+
+    time.sleep(2 + random())
+    x, y = ocrFind("放弃")
+    print('放弃', x)
+    if x is not None:
+        clickXY(x, y)
+    time.sleep(2)
 
     time.sleep(3 + random())
     text = findText("s后")
@@ -124,24 +135,44 @@ def lookGuangGaoOnes(paras, x, y):
         swipeBackOnes()
         time.sleep(2)
 
+    # time.sleep(2)
+    # x, y = textFind("立即")
+    # print('立即', x)
+    # if x is not None:
+    #     clickXY(x, y)
+
     time.sleep(2 + random())
-    ret = findTextAndClick("(立即领取|看视频)", 2)
-    print('立即领取', ret)
-    if ret is not None:
-        return 0
+    x, y = textFind("(立即领取|看视频|立即打开|立即下载|立即完成)")
+    print('立即领取1', x)
+    if x is not None:
+        clickXY(x, y)
+        time.sleep(2 + random())
+        x, y = textFind("(立即领取|看视频|立即打开|立即下载|立即完成)")
+        print('立即领取2', x)
+        if x is not None:
+            swipeBackOnes()
+            time.sleep(2 + random())
+            x, y = textFind("换个任务")
+            print('换个任务', x)
+            if x is not None:
+                clickXY(x, y)
+            return 0
+        else:
+            return 0
     time.sleep(2)
 
-    text = findText('领现金|开心收下')
+    text = findText('领现金|托盘')
     print('领现金', text)
-    if x is not None:
+    if text is not None:
         time.sleep(randint(5, 10))
-        swipeBackApp('首页')
+        swipeBackApp('金币(凌晨自动兑现)', 'text')
         return -1
     else:
         ocrFindText(None)
 
-    swipeBackApp('首页')
+    swipeBackApp('金币(凌晨自动兑现)', 'text')
     print('啥也没干，退出')
+    return 0
 
 def lingJinBi(paras, x, y):
     time.sleep(randint(2, 5))
@@ -154,8 +185,8 @@ def lingJinBi(paras, x, y):
 
 step = [
     {'name': '看视频', "path": []},
-    {'name': '看视频翻倍', "path": ['ocr:福利|立即领取']},
-    {'name': '领金币', "path": ['ocr:福利|立即领取']},
+    {'name': '看视频翻倍', "path": ['ocr:福利|点击领取']},
+    {'name': '领金币', "path": ['ocr:福利|点击领取']},
 
 ]
 
@@ -171,8 +202,7 @@ node = {
         {'name':'看视频翻倍',"ocr": "看视频翻倍", "process": lookGuangGaoOnes, "time": 600, "delay": 0, 'count': 0, 'jinBiPos': jinBiPos}
     ],
     "领金币": [
-        {'name': '领金币', "ocr": r"领(\\d+)金币", "process": lookGuangGaoOnes, "time": 1200, "delay": 0, 'count': 0,
-         'jinBiPos': jinBiPos}
+        {'name': '领金币', "text": r"^(领\\d+金币|\\d+:\\d+ 领金币)$", "process": lookGuangGaoOnes, "time": 600, "delay": 0, 'count': 0}
     ]
 }
 

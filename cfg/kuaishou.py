@@ -5,9 +5,10 @@ from ascript.android import action
 from ascript.android.action import click
 
 from ..util import swipeUp, swipe, register, forWait, clickNodeP, lookGuangGao, lookShortVideo, clickNode, clickXY, \
-    findImageAndClick, imageFind, descFind, swipeBack
+    findImageAndClick, imageFind, descFind, swipeBack, findDesc, textFind, swipeBackApp, ocrFind
 from ascript.android.screen import capture, FindColors, FindImages, Ocr
 from ascript.android.system import R
+from ascript.android.node import Selector
 
 
 def jinBiPos():
@@ -54,9 +55,41 @@ def lookXiFanGuangGao(paras, x, y):
         time.sleep(randint(35, 50))
         action.Key.back()
 
+
+def qiandao(paras, x, y):
+    print('qiandao')
+
+    time.sleep(2)
+    x, y = textFind('连续打卡白拿手机')
+    print('qiandao 连续打卡白拿手机', x)
+    if x is not None:
+        clickXY(x, y)
+
+    time.sleep(2)
+    x, y = textFind('去观看')
+    print('qiandao 去观看', x)
+    if x is not None:
+        clickXY(x, y)
+    time.sleep(2)
+    x, y = textFind('广告完成任务')
+    print('qiandao 广告完成任务', x)
+    if x is not None:
+        clickXY(x, y)
+    else:
+        return -1
+    time.sleep(1)
+    x, y = textFind('去看广告')
+    print('qiandao 去看广告', x)
+    if x is not None:
+        clickXY(x, y)
+
+    time.sleep(randint(30, 35))
+    swipeBackApp('去观看', 'text')
+    return 0
+
 step = [
     {'name': '看视频', "path": []},
-    # {'name': '赚钱', "path": ['image:赚钱']}
+    {'name': '签到', "path": ['id:com.smile.gifmaker:id/kem_task_pendant_new']}
 
 ]
 
@@ -66,12 +99,16 @@ node = {
     #     {'name':'逛街赚钱',"desc": "逛街赚钱", "process": None, "delay": 0, 'count': 0}
     # ],
     "看视频": [
-        {'name':'看视频',"text": "首页", "process": lookShortVideo, "delay": 0, 'count': 0, 'jinBiPos': jinBiPos}
+        {'name':'看视频',"text": "精选", "process": lookShortVideo, "delay": 0, 'count': 0, 'jinBiPos': jinBiPos}
+    ],
+    "签到": [
+        {'name':'签到',"process": qiandao, "time": 300, 'count': 0}
     ]
 }
 
 cfg = {
-    "app": "com.kuaishou.nebula",
+    # "app": "com.kuaishou.nebula",
+    "app": "com.smile.gifmaker",
     'name': '快手',
     "step": step,
     "node": node

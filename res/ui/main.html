@@ -9,6 +9,8 @@
 <br>
 <button onclick='submit()'>确定</button>
 <button onclick='wxclose()'>退出</button>
+<button onclick='mission()'>跑任务</button>
+<button onclick='qiandao()'>签到</button>
 <script type="text/javascript">
     window.onload = function () {
         ascript.call('ready', true)
@@ -17,6 +19,14 @@
     function wxclose() {
         console.log('点击关闭')
         ascript.close()
+    }
+
+    function mission() {
+        ascript.call('mission', true)
+    }
+
+    function qiandao() {
+        ascript.call('qiandao', true)
     }
 
     function submit() {
