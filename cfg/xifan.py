@@ -1,10 +1,11 @@
+import datetime
 import time
 from random import randint, random
 
 from ascript.android import action
 from ascript.android.action import click
 
-from ..util import swipeUp, swipe, register, forWait, clickNodeP, lookGuangGao, lookShortVideo, clickNode, clickXY, \
+from ..util import swipeDown, swipeUp, swipe, register, forWait, clickNodeP, lookGuangGao, lookShortVideo, clickNode, clickXY, \
     findImageAndClick, imageFind, descFind, swipeBack, ocrFind, swipeBackApp, ocrFindText, extract_first_num_to_int, \
     swipeBackOnes, findWaitBack, findTextAndClick, findText, textFind
 from ascript.android.screen import capture, FindColors, FindImages, Ocr
@@ -59,9 +60,7 @@ def lookXiFanGuangGao(paras, x, y):
 def procKeyword():
     keyword = list()
     keyword.append('点击')
-    keyword.append('立即')
     keyword.append('打开')
-    keyword.append('下载')
     keyword.append('充值')
     keyword.append('购买')
     keyword.append('优惠')
@@ -72,7 +71,6 @@ def procKeyword():
     keyword.append('详情')
     keyword.append('查看')
     keyword.append('直播间')
-    keyword.append('立即')
     keyword.append('一键')
     keyword.append('速来')
     keyword.append('抢先')
@@ -98,10 +96,9 @@ def lookGuangGaoOnes(paras, x, y):
         procKeyword()
     else:
         t = randint(WAIT_LOW, WAIT_HIGH)
-        print('自动进入活动 等待', t)
+        print(f'自动进入活动 等待 {t} 秒')
         time.sleep(t)
         swipeBackOnes()
-
 
     time.sleep(3 + random())
     x, y = textFind("继续观看|换个|翻倍")
@@ -109,8 +106,8 @@ def lookGuangGaoOnes(paras, x, y):
     if x is not None:
         clickXY(x, y)
 
-    time.sleep(2 + random())
-    x, y = ocrFind("放弃")
+    time.sleep(5 + random())
+    x, y = textFind("放弃")
     print('放弃', x)
     if x is not None:
         clickXY(x, y)
@@ -164,16 +161,19 @@ def lookGuangGaoOnes(paras, x, y):
     text = findText('领现金|托盘')
     print('领现金', text)
     if text is not None:
-        time.sleep(randint(5, 10))
-        swipeBackApp('金币(凌晨自动兑现)', 'text')
         return -1
     else:
         ocrFindText(None)
 
-    swipeBackApp('金币(凌晨自动兑现)', 'text')
-    print('啥也没干，退出')
-    return 0
+    return -1
 
+def fanbei(paras, x, y):
+    now = datetime.now()
+    if now.hour >= 21:
+        preproc()   
+        return lookGuangGaoOnes(paras, x, y)
+    else:
+        return -1   
 def lingJinBi(paras, x, y):
     time.sleep(randint(2, 5))
     x, y = ocrFind(r'领(\d+)金币')
@@ -183,10 +183,18 @@ def lingJinBi(paras, x, y):
         return -1
     lookGuangGaoOnes(paras, x, y)
 
+def stopProcess():
+    print('stopProcess')
+    swipeBackApp('金币(凌晨自动兑现)', 'text')
+
+    for _ in range(4):
+        swipeDown(0.2, 0.7)
+        time.sleep(0.5+random())
+        
 step = [
-    {'name': '看视频', "path": []},
-    {'name': '看视频翻倍', "path": ['ocr:福利|点击领取']},
-    {'name': '领金币', "path": ['ocr:福利|点击领取']},
+    {'name': '看视频', "path": ["text:首页"]},
+    {'name': '看视频翻倍', "path": ['ocr:福利|点击领取|去领取',"ocr:看视频翻倍"]},
+    {'name': '领金币', "path": ['ocr:福利|点击领取|去领取', r"text:^(领\d+金币|\d+:\d+ 领金币)$"]},
 
 ]
 
@@ -196,13 +204,13 @@ node = {
     #     {'name':'逛街赚钱',"desc": "逛街赚钱", "process": None, "delay": 0, 'count': 0}
     # ],
     "看视频": [
-        {'name':'看视频',"text": "首页", "process": lookShortVideo, "time": 600, "delay": 0, 'count': 0, 'jinBiPos': jinBiPos}
+        {'name':'看视频', "process": lookShortVideo, 'stop': stopProcess, "time": 600, "delay": 0, 'count': 0, 'jinBiPos': jinBiPos}
     ],
     "看视频翻倍": [
-        {'name':'看视频翻倍',"ocr": "看视频翻倍", "process": lookGuangGaoOnes, "time": 600, "delay": 0, 'count': 0, 'jinBiPos': jinBiPos}
+        {'name':'看视频翻倍', "process": fanbei, 'stop': stopProcess, "time": 600, "delay": 0, 'count': 0, 'jinBiPos': jinBiPos}
     ],
     "领金币": [
-        {'name': '领金币', "text": r"^(领\\d+金币|\\d+:\\d+ 领金币)$", "process": lookGuangGaoOnes, "time": 600, "delay": 0, 'count': 0}
+        {'name': '领金币', "process": lookGuangGaoOnes, 'stop': stopProcess, "time": 600, "delay": 0, 'count': 0}
     ]
 }
 

@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        button {
+            font-size: 16px;
+            /* padding: 10px 10px;
+            margin: 5px; */
+        }
+    </style>
 </head>
 <body>
 <div id="contentContainer"></div>
@@ -39,7 +46,8 @@
         [...checkedCheckboxes].forEach(checkbox => {
             const groupName = checkbox.name; // 获取分组名（name 属性）
             const value = checkbox.value;    // 获取选中值
-
+            console.log('groupName' + groupName + 'value' + value)
+            
             // 若该分组已存在，往数组中添加值；否则创建新数组
             if (groupedData[groupName]) {
                 groupedData[groupName].push(value);
@@ -57,16 +65,16 @@
     }
 
     function senddata(str) {
-        console.log('senddata', str)
+        // console.log('senddata', str)
         nestedObj = JSON.parse(str);
-        console.log('senddata' + typeof(nestedObj))
+        // console.log('senddata' + typeof(nestedObj))
         for (const item of Object.values(nestedObj)) {
             const container = document.getElementById("contentContainer");
-            console.log('item.name' + item.name + 'container' + container)
+            // console.log('item.name' + item.name + 'container' + container)
             // 2. 添加文字（创建 p 标签，设置文字内容）
             const textElement = document.createElement("p");
             textElement.textContent = item.name; // 文字内容
-            textElement.style.fontSize = "28px"; // 可选：设置样式（字体大小）
+            textElement.style.fontSize = "26px"; // 可选：设置样式（字体大小）
             container.appendChild(textElement); // 挂载到容器
             i = 0;
             item.step.forEach(item2 => {
@@ -76,10 +84,11 @@
                 checkbox.name = item.name; // 同一组多选框 name 需相同（便于后续获取值）
                 checkbox.value = item2.name; // 多选框的值（提交时传递）
                 // checkbox.checked = true; // 默认选中
-                checkbox.id = 'checkbox-${item.value}'; // 唯一 ID（用于关联 label）
+                checkbox.id = 'checkbox-' + item.name+'-' + item2.name; // 唯一 ID（用于关联 label）
+                // console.log('item.value' + item.value, 'checkbox.id' + checkbox.id)
                 checkbox.style.width = "25px"
                 checkbox.style.height = "25px"
-                container.appendChild(checkbox);
+                // console.log("item2.display：", item.name, item2.name, item2.display);
 
                 // 创建标签（label）：点击文字也能选中多选框，提升体验
                 const label = document.createElement("label");
@@ -87,12 +96,32 @@
                 label.textContent = item2.name; // 标签文字
                 label.style.fontSize = "22px"
                 //label.style.marginRight = "28px"; // 可选：设置样式（右边距）
-                container.appendChild(label);
-                i = i + 1
-                if(i%2==0){
+                if(item2.display == "False"){
+                    checkbox.style.opacity = 0;
+                    checkbox.style.position = "absolute";
+                    label.style.opacity = 0;
+                    label.style.position = "absolute";
+                }
+                else {
+
+                if(i%2==0 && i!=0){
                     const br = document.createElement("br");
                     container.appendChild(br);
                 }
+                i = i + 1
+
+                const wrapper = document.createElement("span");
+                
+                wrapper.style.display = "inline-flex";
+                wrapper.style.alignItems = "center";
+                wrapper.appendChild(checkbox);
+                wrapper.appendChild(label);
+
+                container.appendChild(wrapper);
+                }
+                
+                
+                
             });
             const br = document.createElement("br");
             container.appendChild(br);

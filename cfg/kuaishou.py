@@ -60,16 +60,12 @@ def qiandao(paras, x, y):
     print('qiandao')
 
     time.sleep(2)
-    x, y = textFind('连续打卡白拿手机')
-    print('qiandao 连续打卡白拿手机', x)
-    if x is not None:
-        clickXY(x, y)
+    node = Selector().text("去观看").find_all()[-1]
+    
+    print('qiandao 去观看', node)
+    if node is not None:
+        clickNode(node)
 
-    time.sleep(2)
-    x, y = textFind('去观看')
-    print('qiandao 去观看', x)
-    if x is not None:
-        clickXY(x, y)
     time.sleep(2)
     x, y = textFind('广告完成任务')
     print('qiandao 广告完成任务', x)
@@ -87,10 +83,25 @@ def qiandao(paras, x, y):
     swipeBackApp('去观看', 'text')
     return 0
 
+def qiandaoshipin(paras, x, y):
+    print('qiandaoshipin')
+
+    #看视频xxxxxxxxxxxx
+
+    x, y = ocrFind("去观看")
+    print('完成去观看打卡', x, y)
+    clickXY(x, y)
+    time.sleep(2)
+
+def stopProcess():
+    print('stopProcess')
+    swipeBackApp('首页', 'text')
+ 
+
 step = [
     {'name': '看视频', "path": []},
-    {'name': '签到', "path": ['id:com.smile.gifmaker:id/kem_task_pendant_new']}
-
+    {'name': '签到', "display":"Falsee", "path": ['id:com.smile.gifmaker:id/kem_task_pendant_new', 'text:连续打卡白拿手机']},
+    {'name': '签到视频', "display":"True", "path": ['id:com.smile.gifmaker:id/kem_task_pendant_new', 'text:今日待打卡']}
 ]
 
 node = {
@@ -102,7 +113,10 @@ node = {
         {'name':'看视频',"text": "精选", "process": lookShortVideo, "delay": 0, 'count': 0, 'jinBiPos': jinBiPos}
     ],
     "签到": [
-        {'name':'签到',"process": qiandao, "time": 300, 'count': 0}
+        {'name':'签到',"process": qiandao, 'stop': stopProcess, "time": 300, 'count': 0}
+    ],
+    "签到视频": [
+        {'name': '签到视频', "text": "连续打卡白拿手机", "process": qiandaoshipin, "time": 600, 'count': 0}
     ]
 }
 

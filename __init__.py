@@ -36,6 +36,7 @@ register(kuaishou.cfg)
 # register(baidu.cfg)
 # register(hongguo.cfg)
 register(xifan.cfg)
+register(hongguo.cfg)
 
 ui.show(util.procList)
 # process()

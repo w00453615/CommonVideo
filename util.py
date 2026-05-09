@@ -17,14 +17,15 @@ from ascript.android.screen import capture, FindColors, FindImages, Ocr
 from ascript.android import system
 # 环境设备相关
 from ascript.android.system import R, Device
+from ascript.android.ui import Dialog
 
 
 import math
 import time
 
 curApp = None
-WAIT_LOW = 20
-WAIT_HIGH = 30
+WAIT_LOW = 30
+WAIT_HIGH = 35
 
 def clickNode(node):
     centerX = node.rect.centerX() + math.floor(random() * 11) - 5
@@ -32,14 +33,14 @@ def clickNode(node):
     print(centerX, centerY)
     click(centerX, centerY)
 
-def clickXY(x, y):
-    centerX = randint(x-5, x+5)
-    centerY = randint(y-5, y+5)
+def clickXY(x, y, delta = 5):
+    centerX = randint(x-delta, x+delta)
+    centerY = randint(y-delta, y+delta)
     # print(centerX, centerY)
     click(centerX, centerY)
 
 def findDescAndClick(keyword, delay=5):
-    print('findDescAndClick' + keyword)
+    print(f'findDescAndClick {keyword}')
     for _ in range(delay):
         node = Selector().desc(keyword).find()
         if node:
@@ -48,12 +49,12 @@ def findDescAndClick(keyword, delay=5):
             return node
         else:
             time.sleep(2)
-    print('findDescAndClick exit' + keyword)
+    print(f'findDescAndClick exit {keyword}')
     return None
 
 
 def findPathAndClick(keyword, delay=5):
-    print('findPathAndClick' + keyword)
+    print(f'findPathAndClick {keyword}')
     for _ in range(delay):
         node = Selector().path(keyword).find()
         if node:
@@ -62,12 +63,12 @@ def findPathAndClick(keyword, delay=5):
         else:
             time.sleep(2)
 
-    print('findPathAndClick exit' + keyword)
+    print(f'findPathAndClick exit {keyword}')
     return None
 
 
 def findTextAndClick(keyword, delay=5):
-    print('findTextAndClick' + keyword)
+    print(f'findTextAndClick {keyword}')
     for _ in range(delay):
         node = Selector().text(keyword).find()
 
@@ -77,38 +78,48 @@ def findTextAndClick(keyword, delay=5):
             return node
         else:
             time.sleep(2)
-    print('findTextAndClick exit' + keyword)
+    print(f'findTextAndClick exit {keyword}')
     return None
 
-def findText(keyword, delay=5):
-    print('findText' + keyword)
+def findText(keyword, delay=5, index=0):
+    print(f'findText {keyword}')
     keyword = keyword.replace('\\\\', '\\')
     for _ in range(delay):
-        node = Selector().text(keyword).find()
+        if index == 0:
+            node = Selector().text(keyword).find()
+        else:
+            all = Selector().text(keyword).find_all()
+            # print(f'findTextAll {all}')
+            if all is None:
+                return None
+            elif len(all) <= index:
+                node = all[0]
+            else:
+                node = all[index]
 
         if node:
-            print('findText end' + node.text)
+            print(f'findText end {node.text}')
             return node.text
         else:
             time.sleep(2)
-    print('findText exit' + keyword)
+    print(f'findText exit {keyword}')
     return None
 
 def findDesc(keyword, delay=5):
-    print('findDesc' + keyword)
+    print(f'findDesc {keyword}')
     for _ in range(2):
         node = Selector().desc(keyword).find()
 
         if node:
-            print('findDesc end' + node.desc)
+            print(f'findDesc end {node.desc}')
             return node.desc
         else:
             time.sleep(2)
-    print('findDesc error' + keyword)
+    print(f'findDesc error {keyword}')
     return None
 
 def findImageAndClick(keyword, delay=5):
-    print('findImageAndClick' + keyword)
+    print(f'findImageAndClick {keyword}')
     for _ in range(delay):
         res = FindImages.find_template([R.img(keyword), ], confidence=0.7)
 
@@ -122,26 +133,27 @@ def findImageAndClick(keyword, delay=5):
             return True
         else:
             time.sleep(2)
-    print('findImageAndClick exit' + keyword)
+    print(f'findImageAndClick exit {keyword}')
     return None
 
 
 def findTextEndAndClick(keyword, end, delay=5):
-    print('findTextEndAndClick' + keyword)
+    print(f'findTextEndAndClick {keyword}')
     for _ in range(delay):
         node = Selector().text(keyword).find()
 
         if node:
             clickNode(node)
-
+            print(f'findTextEndAndClick1 end {node}')
             return node
         else:
             time.sleep(2)
 
         node2 = Selector().text(end).find()
         if node2:
+            print(f'findTextEndAndClick2 end {node2}')
             return node
-    print('findTextAndClick exit' + keyword)
+    print(f'findTextEndAndClick exit {keyword}')
     return None
 
 
@@ -184,11 +196,11 @@ def swipeBackCount(count):
 #     return True
 
 def swipeBack(to, type='ocr'):
-    print('swipeBack')
+    # print('swipeBack')
     x = None
     y = None
     count = 0
-    time.sleep(2 + random() / 2)
+    time.sleep(1 + random() / 2)
 
     while True:
         if type == 'ocr':
@@ -236,7 +248,7 @@ def swipeUp(low=0.2, high=0.7):
     # action.slide(startX, startY - 300, startX, endY, randint(95, 105))
     t = randint(200, 220)
     action.slide(startX, startY, endX, endY, t)
-    # print('swipe', startX, startY, endX, endY, t)
+    print(f'swipeUp {startX}, {startY}, {endX}, {endY}, {t}')
 
 
 def swipeDown(low=0.2, high=0.7):
@@ -254,7 +266,7 @@ def swipeDown(low=0.2, high=0.7):
     # action.slide(startX, startY - 300, startX, endY, randint(95, 105))
     t = randint(200, 220)
     action.slide(startX, startY, endX, endY, t)
-    # print('swipe', startX, startY, endX, endY, t)
+    print(f'swipeDown {startX}, {startY}, {endX}, {endY}, {t}')
 
 
 def swipes(sec=15):
@@ -315,13 +327,43 @@ def imageFind(text, confidence=0.9):
 
 def ocrFindText(text, confidence=0.9):
     # print('ocrFind', text)
+    res = Ocr.mlkitocr_v2(None, pattern=text)
+    if res:
+        for r in res:
+            # print(f'ocrFindText {r.text} end')
+            if text is not None:
+                # print(r.text)  # 打印出文本
+                return r.center_x, r.center_y, r.text
+                # print(r['center_x'], r['center_y'])  # 识别范围
+                # print(r['confidence'])  # 可信度
+
+    # print('ocrFind not find', text)
+    return None, None, None
+
+def ocrFindTextPad(text, confidence=0.9):
+    # print('ocrFind', text)
+    res = Ocr.paddleocr(None, pattern=text)
+    if res:
+        for r in res:
+            print(f'ocrFindText {r.text} end')
+            if text is not None:
+                # print(r.text)  # 打印出文本
+                return r.center_x, r.center_y, r.text
+                # print(r['center_x'], r['center_y'])  # 识别范围
+                # print(r['confidence'])  # 可信度
+
+    # print('ocrFind not find', text)
+    return None, None, None
+
+def ocrFindTextRect(text, confidence=0.9):
+    # print('ocrFind', text)
     res = Ocr.mlkitocr_v2(None, text)
     if res:
         for r in res:
             print('ocrFindText', r.text, 'end')
             if text is not None:
                 # print(r.text)  # 打印出文本
-                return r.center_x, r.center_y, r.text
+                return r.center_x, r.center_y, r.rect
                 # print(r['center_x'], r['center_y'])  # 识别范围
                 # print(r['confidence'])  # 可信度
 
@@ -394,13 +436,13 @@ def lookGuangGao(paras, x, y):
 
 
 def getJinBi(paras):
-    print('getJinBi')
+    # print('getJinBi')
     if 'jinBiPos' not in paras:
-        print('getJinBi exit')
+        # print('getJinBi exit')
         return 0
     jinBiPos = paras['jinBiPos']
     rect = jinBiPos()
-    print('getJinBi', jinBiPos, 'rect', rect)
+    # print('getJinBi', jinBiPos, 'rect', rect)
 
     # res = Ocr(rect=rect).paddleocr_v3()
     res = Ocr.mlkitocr_v2(rect, r'^[1-9]\d*$')
@@ -411,12 +453,11 @@ def getJinBi(paras):
             return int(r.text)
             # print(r['center_x'], r['center_y'])  # 识别范围
             # print(r['confidence'])  # 可信度
-        print('end')
+        # print('end')
 
 
-def lookShortVideo(paras, x, y, low = 3, up = 5):
+def lookShortVideo(paras, x, y, low = 4, up = 5):
     time.sleep(3)
-    print('lookShortVideo')
 
     before = getJinBi(paras)
     count = 0
@@ -428,7 +469,7 @@ def lookShortVideo(paras, x, y, low = 3, up = 5):
             swipeUp(0.2,0.6)
 
             continue
-        print('lookShortVideo', before, after, count)
+        # print(f'lookShortVideo {before} {after} {count}')
         if before == after:
             count += 1
         else:
@@ -454,46 +495,56 @@ procList = {}
 
 
 def register(cfg):
-    print('register', cfg)
+    # print('register', cfg)
     procList[cfg['name']] = cfg
 
 
 def findPath(step, name):
     path = step['path']
+    if len(path) == 0:
+        return True
     for it in path:
         type, value = it.split(':',1)
-        time.sleep(1+random())
-        x,y = findPosSingle(type, value)
-        if x is not None:
-            clickXY(x, y)
-            break
-        # if type == 'text':
-        #     if findTextAndClick(value, 3):
-        #         break
-        # if type == 'desc':
-        #     if findDescAndClick(value, 3):
-        #         break
-        # if type == 'image':
-        #     if findImageAndClick(name + '/' + value + '.png', 3):
-        #         break
-        # if type == 'ocr':
-        #     x, y = ocrFind(value)
-        #     if x is not None:
-        #         clickXY(x, y)
-        #         break
-        swipeUp()
+        print(f'findPath1 {it} name {name} type {type} value {value}')
+        time.sleep(2+random())
+        
+        find = False
+        for _ in range(4):
+            x,y = findPosSingle(type, value)
+            if x is not None:
+                print(f'findPath3 found {it} {name} x {x} y {y} find {find}')
+                clickXY(x, y)
+                find = True
+                break
+            
+            # if i == 0:
+            #     for _ in range(4):
+            #         swipeDown()
+            #         time.sleep(2+random())
+
+            swipeUp(0.2, 0.6)
+            time.sleep(2+random())
+        print(f'findPath4 {type} {value} find {find}')
+        if not find:
+            print(f'findPath {type} {value} not found')
+            # for _ in range(4):
+            #     swipeDown(0.2, 0.7)
+            #     time.sleep(0.5+random())
+            return False
+    return True
+
+        
 
 
 def procSingle(cfgName, check):
     cfg = procList[cfgName]
-    print('cfg', cfg, 'check', check)
     app = cfg['app']
 
     global curApp
     curApp = app
 
     system.open(app)
-    time.sleep(5)
+    time.sleep(4)
 
     steps = cfg['step']
     nodes = cfg['node']
@@ -503,22 +554,22 @@ def procSingle(cfgName, check):
         for step in steps:
             if i < 2 and step['name'] not in check:
                 continue
-            findPath(step, name)
+
+            print(f'procSingle {cfgName} {step["name"]}')
+            if not findPath(step, step['name']):
+                print(f'procSingle {cfgName} {step["name"]} not found')
+                callStopCallbacks(nodes, step['name'])
+                continue
 
             find = False
 
             for _ in range(1):
 
                 nodeList = nodes[step['name']]
-                print('nodeList', nodeList)
+                print(f'nodeList {nodeList}')
                 for it in nodeList:
-                    time.sleep(3+random())
-                    x, y = findPos(it, name, step)
-                    if x is not None:
-                        clickXY(x, y)
-
                     proc = it['process']
-                    print('find node', it['name'], proc)
+                    print(f'find node {it["name"]} proc {proc}')
 
                     if proc:
 
@@ -529,62 +580,70 @@ def procSingle(cfgName, check):
                         time1 = datetime.now()
                         while True:
                             time.sleep(2 + random())
-
-                            if proc(it, x, y) == -1:
+                            # Dialog.toast(it["name"],3000)
+                            if proc(it, None, None) == -1:
                                 break
                             time2 = datetime.now()
                             time_diff = (time2 - time1).total_seconds()
-                            print('procSingle time', time_diff)
+                            print(f'procSingle {proc} time {time_diff}')
                             if time_diff > procTime:
                                 break
-                        # find = True
 
                     else:
                         break
-                    for _ in range(3):
-                        swipeDown(0.2, 0.7)
-                        time.sleep(2)
+                    callStopCallbacks(nodes, step['name'])
 
-    swipeBackCount(5)
-                # if find:
-                #     break
-                # else:
-                #     if i < 1:
-                #         swipeUp(0.2, 0.5)
+def callStopCallbacks(nodes, step_name):
+    if step_name in nodes:
+        nodeList = nodes[step_name]
+        for it in nodeList:
+            if 'stop' in it and callable(it['stop']):
+                print(f'calling stop callback for {it["name"]}')
+                it['stop']()
 
 def findPosSingle(type, text):
     x = None
     y = None
-    print('findPosSingle', type, text)
-    if 'text' in type:
+    print(f'findPosSingle {type} {text}')
+    if 'text' == type:
         x, y = textFind(text)
-    elif 'desc' in type:
+    elif 'desc' == type:
         x, y = descFind(text)
-    elif 'path' in type:
+    elif 'path' == type:
         x, y = pathFind(text)
-    elif 'id' in type:
+    elif 'id' == type:
         x, y = idFind(text)
-        print('findPosSingle', x, y)
     # elif 'image' == type:
     #     print(step['name'] + '/' + it['image'])
     #     x, y = imageFind(name + '/' + it['image'] + '.png')
-    elif 'ocr' in type:
-        for _ in range(2):
-            text = text.replace('\\\\', '\\')
-            x, y = ocrFind(r'' + text)
-            print('findPos', text, x)
+    elif 'ocr' == type:
+        text = text.replace('\\\\', '\\')
+        x, y = ocrFind(r'' + text)
+        # print(f'findPosSingle xy {x} {y}')
+        if x is not None:
+            return x, y
+    elif 'rightocr' == type:
+        text = text.replace('\\\\', '\\')
+        resList = Ocr.mlkitocr_v2(pattern=r'' + text)
+        for res in resList:
+            x, y = res.rect[2]-20, res.center_y
+            print(f'findPosSingle rightocr {text} x {x} y {y} rect {res.rect} ')
             if x is not None:
                 return x, y
-        ocrFindText(None)
+            # else:
+            #     x, y, _ = ocrFindTextPad(r'' + text)
+            #     print(f'findPosSingle rightocrPad {text} x {x} y {y} rect {res["rect"]} ')
+            #     if x is not None:
+            #         return x, y
     return x, y
 
 def findPos(it, name, step):
     x = None
     y = None
-    swipeDown()
     time.sleep(3)
+    print(f'findPos {it} step {step}')
 
-    for _ in range(6):
+    for _ in range(4):
         if 'text' in it:
             x, y = findPosSingle('text', it['text'])
         elif 'desc' in it:
@@ -594,16 +653,16 @@ def findPos(it, name, step):
         elif 'id' in it:
             x, y = findPosSingle('path',it['id'])
         elif 'image' in it:
-            print(step['name'] + '/' + it['image'])
+            print(f'findPos {step["name"]} {it["image"]}')
             x, y = imageFind(name + '/' + it['image'] + '.png')
         elif 'ocr' in it:
             for _ in range(2):
                 text = it['ocr'].replace('\\\\','\\')
                 x, y = findPosSingle('ocr', r''+text)
-                print('findPos', text, x, y)
+                print(f'findPos {text} {x} {y}')
                 if x is not None:
                     return x, y
-            ocrFindText(None)
+            # ocrFindText(None)
                 # else :
                 #     swipeUp(0.2, 0.6)
                 #     time.sleep(2)
@@ -614,7 +673,7 @@ def findPos(it, name, step):
         else:
             swipeUp(0.2, 0.5)
             time.sleep(3)
-    print('findPos', it, x, y)
+    print(f'findPos {it["name"]} {x} {y}')
     return x, y
 
 
@@ -637,10 +696,10 @@ def process(check):
     # while True:
     #     swipeUp()
     #     time.sleep(randint(60, 100))
-    # Ocr.set_engine("mlkit")
-    print(procList, check)
+    Ocr.set_engine("mlkit")
+    print(f'process {check}')
     for _ in range(100):
         for cfg in procList:
-            print('cfg', cfg, 'check', check)
+            # print('cfg', cfg, 'check', check)
             if cfg in check:
                 procSingle(cfg, check[cfg])

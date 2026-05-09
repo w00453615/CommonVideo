@@ -1,1 +1,6 @@
-.vscode/.ascript-sync.json
+.idea/
+.env/
+.vscode/
+.res/
+.gitignore
+build.as

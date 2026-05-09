@@ -9,14 +9,14 @@ from ascript.android.action import click
 
 from ..util import swipeUp, swipe, register, forWait, clickNodeP, lookGuangGao, lookShortVideo, clickNode, clickXY, \
     findImageAndClick, imageFind, descFind, swipeBack, ocrFind, swipeBackOnes, ocrFindText, swipeBackApp, WAIT_LOW, \
-    WAIT_HIGH, findWaitBack, extract_first_num_to_int, findText, findDesc, swipeDown
+    WAIT_HIGH, findWaitBack, extract_first_num_to_int, findText, findDesc, swipeDown, ocrFindTextRect
 from ascript.android.screen import capture, FindColors, FindImages, Ocr
 from ascript.android.system import R
 
 
 def preproc():
     x, y = ocrFind("签到领")
-    print('签到领', x)
+    print(f'签到领 {x}')
     if x is not None:
         clickXY(x, y)
         time.sleep(2)
@@ -61,7 +61,7 @@ def swipeBackAppDouYinGuangGao():
 
 
 def swipeBackAppDouYinShouYe():
-    swipeBackApp('首页', 'desc')
+    swipeBackApp('赚钱任务', 'ocr')
 
 
 def lookDouyinGuangGaoOnes():
@@ -69,12 +69,12 @@ def lookDouyinGuangGaoOnes():
     # ocrFind('看广告赚金币')
     time.sleep(5 + random())
     text = findDesc("秒后")
-    print('秒后可领奖励', text)
+    print(f'秒后可领奖励 {text}')
     if text is not None:
         procKeyword()
     else:
         t = randint(WAIT_LOW, WAIT_HIGH)
-        print('自动进入活动 等待', t)
+        print(f'自动进入活动 等待 {t}')
         time.sleep(t)
         swipeBackAppDouYinGuangGao()
 
@@ -86,26 +86,26 @@ def lookDouyinGuangGaoOnes():
 
     time.sleep(3 + random())
     text = findDesc("秒后")
-    print('秒后可领奖励', text)
+    print(f'秒后可领奖励 {text}')
     if text is not None:
         leftStr = extract_first_num_to_int(text)
         if leftStr is not None:
             left = min(30, int(leftStr))
-            print('秒后可领奖励 等待', left)
+            print(f'秒后可领奖励 等待 {left}')
 
             time.sleep(left + 2 + random())
 
     time.sleep(2 + random())
 
-    text = findDesc('领取成功', 0.8)
-    print('领取成功', text)
+    text = findDesc('领取成功')
+    print(f'领取成功 {text}')
     if text is not None:
         swipeBackOnes()
         time.sleep(2)
 
     time.sleep(2 + random())
     x, y = ocrFind("领取奖励")
-    print('领取奖励', x)
+    print(f'领取奖励 {x}')
     if x is not None:
         clickXY(x, y)
         time.sleep(2)
@@ -116,25 +116,16 @@ def lookDouyinGuangGaoOnes():
     x, _ = ocrFind('评论')
     x1, _ = ocrFind('评价')
     x2, _ = ocrFind('赚钱任务')
-    print('评论并收下金币', x, x1, x2)
+    print(f'评论并收下金币 {x}, {x1}, {x2}')
     if x is not None or x1 is not None or x2 is not None:
-        time.sleep(randint(5, 10))
-        swipeBackAppDouYinShouYe()
+        swipeBackOnes()
         return -1
     else:
         ocrFindText(None)
 
-    text = findText('首页')
-    if text is not None:
-        return -1
-
-    print('lookDouyinGuangGaoOnes count', count)
+    print(f'lookDouyinGuangGaoOnes count {count}')
     if count == 2:
         count = 0
-        # system.open('com.ss.android.ugc.aweme.lite')
-        swipeBackAppDouYinShouYe()
-        print('啥也没干，退出')
-
         return -1
     else:
         count = count + 1
@@ -168,35 +159,61 @@ def procKeyword():
 
 def lookDouyinGuangGao(paras, x, y):
     preproc()
+    time.sleep(3 + random())
+    x, y = ocrFind("赚钱任务")
+    if x is not None:
+        print(f'赚钱任务 {x}')
+        swipeBackAppDouYinShouYe()
+        return -1
     return lookDouyinGuangGaoOnes()
 
+def chaoduoqian(paras, x, y):
+    x, y = ocrFind("赚钱任务")
+    if x is not None:
+        print(f'chaoduoqian 赚钱任务 {x}')
+        return -1
+
+    now = datetime.now()
+    if now.hour >= 21:
+        preproc()   
+        return lookBaoXiang(paras, x, y)
+    else:
+        return -1
 
 def lookBaoXiang(paras, x, y):
     preproc()
 
-    time.sleep(2 + random())
     x, y, text = ocrFindText(r"看广告再")
-    print('看广告再', x, y)
+    print(f'看广告再 {text}')   
     if x is not None:
         clickXY(x, y)
-    else:
-        ocrFindText(None)
+    # else:
+    #     ocrFindText(None)
+
+    time.sleep(3 + random())
+    x, y = ocrFind("赚钱任务")
+    if x is not None:
+        print(f'lookBaoXiang 赚钱任务 {x}')
+        return -1
 
     return lookDouyinGuangGaoOnes()
 
 
 def zhiding(paras, x, y):
     print('zhiding')
-    time.sleep(2 + random())
-    x, y, text = ocrFindText(r"看指定")
-    print('看指定', x, y)
-    if x is not None:
-        clickXY(x, y)
 
     x, y, text = ocrFindText(r"支付积分")
-    print('支付积分', x, y)
+    print(f'支付积分 {text}')
     if x is not None:
-        return -1
+        time.sleep(6 + random())
+        x, y, text = ocrFindText(r"看指定")
+        print(f'看指定 {text}')
+        if x is not None:
+            clickXY(x, y)
+        else:
+            return -1
+
+    time.sleep(2 + random())
 
     return lookDouyinGuangGaoOnes()
 
@@ -232,12 +249,18 @@ def qiandao(paras, x, y):
             time.sleep(left + 2 + random())
     else:
         time.sleep(randint(30, 35))
-    swipeBackApp('首页', 'text')
+    swipeBackAppDouYinShouYe()
 
     return -1
 
 
 def guangjie(paras, x, y):
+
+    x, y = descFind("赚钱任务")
+    if x is not None:
+        print(f'赚钱任务 {x}')
+        return -1
+
     text = findDesc('15/15')
     if text is not None:
         return -1
@@ -264,30 +287,30 @@ def guangjie(paras, x, y):
             break
         swipeDown()
         time.sleep(2 + random())
-    swipeBackApp('首页', 'text')
     return -1
 
 def chifandaka(paras, x, y):
     time.sleep(2 + random())
     x, y = ocrFind("赚钱任务")
     if x is not None:
-        print('赚钱任务', x)
+        print(f'chifandaka 赚钱任务 {x}')
         return -1
     
     x, y = ocrFind("看指定视频")
     if x is not None:
-        print('看指定视频', x)
-        clickXY(x, y)
+        return -1
 
     return lookDouyinGuangGaoOnes()
 
 def double(paras, x, y):
+
     x, y = ocrFind("赚钱任务")
     if x is not None:
+        print(f'double 赚钱任务 {x}')
         return -1
 
     for _ in range(5):
-        lookShortVideo(paras, x, y, 16, 18)
+        lookShortVideo(paras, x, y, 18, 20)
 
     swipeBackOnes()
     time.sleep(2)
@@ -302,53 +325,147 @@ def double(paras, x, y):
     print('退出', x)
     if x is not None:
         clickXY(x, y)
+
     return -1
 
+def douyinLookShortVideo(paras, x, y, low = 4, up = 5):
+    print('douyinLookShortVideo')
+    x, y = ocrFind("赚钱任务")
+    if x is not None:
+        print(f'douyinLookShortVideo 赚钱任务 {x}')
+        swipeBackOnes()
+
+    return lookShortVideo(paras, x, y, low, up)
+
+def kanzhibo(paras, x, y):
+    time.sleep(5 + random())
+    x, y, rect = ocrFindTextRect(r"开宝箱")
+    print(f'开宝箱 {x}, {y} {rect}')
+    if x is not None and rect is not None:
+        clickXY(rect[2]-15, y, 0)
+        print(f'开宝箱1 {rect[2]-15}, {y} {rect}')
+        time.sleep(2 + random())
+        
+        
+        swipeBackOnes()
+    
+    num = 120
+
+    _,_,text =ocrFindText(r"(\d+).*后可开")
+    print(f'kanzhibo {text}')
+    if text is not None:
+        match = re.search(r'(\d{1,2}):(\d{2})', text)
+        if match:
+            minutes = int(match.group(1))
+            seconds = int(match.group(2))
+            num = minutes * 60 + seconds
+            print(f'提取的时间: {match.group(0)}, 转换为秒: {num}')
+    
+    time.sleep(num + random())
+    swipeBackAppDouYinShouYe()
+    return -1
+
+def qiandaoshipin(paras, x, y):
+    print('qiandaoshipin')
+
+    # x, y = ocrFind("完成打卡")
+    # print('完成打卡', x, y)
+    # clickXY(x, y)
+    # time.sleep(2)
+
+    # x, y = ocrFind("分钟视频")
+    # print('分钟视频', x, y)
+    # clickXY(x, y)
+    # time.sleep(2)
+
+    # x, y = ocrFind("去看视频")
+    # print('去看视频', x, y)
+    # clickXY(x, y)
+    # time.sleep(2)
+
+    if not hasattr(qiandaoshipin, 'last_value'):
+        qiandaoshipin.last_value = None
+    if not hasattr(qiandaoshipin, 'start_time'):
+        qiandaoshipin.start_time = datetime.now()
+    text = findText(r"\d{2}:\d{2}$", index=1)
+    print(f'1 最后两位数字: last {qiandaoshipin.last_value} now {text}')
+    if text is not None:
+        match = re.search(r'(\d{2})$', text)
+        if match:
+            last_two = match.group(1)
+            
+            print(f'2 最后两位数字: last {qiandaoshipin.last_value}  now {last_two}')
+            print(f'3 最后两位数字: last {qiandaoshipin.start_time} now {datetime.now()} {datetime.now() - qiandaoshipin.start_time}')
+            if qiandaoshipin.last_value is None or last_two == qiandaoshipin.last_value or (datetime.now() - qiandaoshipin.start_time).total_seconds() > randint(10, 20):
+                swipeUp(0.2,0.6)
+                qiandaoshipin.start_time = datetime.now()
+            time.sleep(2+random())
+
+            qiandaoshipin.last_value = last_two
+            return 0
+    swipeBackAppDouYinShouYe()
+    return -1
+
+def stopProcess():
+    print('stopProcess')
+    swipeBackAppDouYinShouYe()
+
+    for _ in range(4):
+        swipeDown(0.2, 0.7)
+        time.sleep(0.5+random())
 
 step = [
-    {'name': '看视频', "path": []},
-    {'name': '看广告', "path": ['id:com.ss.android.ugc.aweme.lite:id/kd']},  # 打开赚钱
+    {'name': '看广告', "display":"False", "path": ['rightocr:赚钱', "desc:指定视频任务|广告任务"]},  # 打开赚钱
     # {'name': '看视频赚超多钱', "path": ['path:/FrameLayout/ViewGroup/FrameLayout/FrameLayout']},
-    {'name': '看视频赚超多钱', "path": ['id:com.ss.android.ugc.aweme.lite:id/kd']},
+    {'name': '看视频赚超多钱', "display":"False", "path": ['rightocr:赚钱', "ocr:立即领取"]},
     {'name': '跑任务', "path": []},
-    {'name': '签到', "path": ['id:com.ss.android.ugc.aweme.lite:id/kd']},
-    {'name': '逛街', "path": ['id:com.ss.android.ugc.aweme.lite:id/kd']},
-    {'name': '双倍奖励', "path": ['id:com.ss.android.ugc.aweme.lite:id/kd']},
-    {'name': '指定视频', "path": ['id:com.ss.android.ugc.aweme.lite:id/kd']},
-    {'name': '吃饭打卡', "path": ['id:com.ss.android.ugc.aweme.lite:id/kd']},
-    {'name': '开宝箱', "path": ['id:com.ss.android.ugc.aweme.lite:id/kd']}
+    {'name': '签到', "display":"False", "path": ['rightocr:赚钱']},
+    {'name': '逛街', "display":"False", "path": ['rightocr:赚钱', "desc:浏览低价"]},
+    {'name': '双倍奖励', "display":"False", "path": ['rightocr:赚钱', "desc:双重奖励"]},
+    {'name': '指定视频', "display":"Falsee", "path": ['rightocr:赚钱', "desc:做任务最高"]},
+    {'name': '吃饭打卡', "display":"False", "path": ['rightocr:赚钱', "desc:打卡领吃饭补贴", 'ocr:看指定视频']},
+    {'name': '看直播', "path": ['rightocr:赚钱']},
+    {'name': '开宝箱', "display":"Falsee", "path": ['rightocr:赚钱', "ocr:开宝箱得金币|点击领"]},
+    {'name': '签到视频', "display":"True", "path": ['rightocr:赚钱', "desc:今日待打卡", 'ocr:完成打卡', 'ocr:分钟视频', 'ocr:去看视频']},
+    {'name': '看视频', "path": []}
 ]
 
 node = {
     "看广告": [
-        {'name': '广告', "desc": "指定视频任务|广告任务", "process": lookDouyinGuangGao, "time": 1200, 'count': 0}
+        {'name': '看广告', "process": lookDouyinGuangGao, 'stop': stopProcess, "time": 1200, 'count': 0}
     ],
     "开宝箱": [
-        {'name': '开宝箱', "ocr": "开宝箱得金币|点击领", "process": lookBaoXiang, "time": 1200, "delay": 0, 'count': 0}
+        {'name': '开宝箱', "process": lookBaoXiang, 'stop': stopProcess, "time": 1200, "delay": 0, 'count': 0}
     ],
     "看视频赚超多钱": [
-        {'name': '看视频赚超多钱', "ocr": "立即领取", "process": lookBaoXiang, "delay": 0, 'count': 0}
+        {'name': '看视频赚超多钱', "process": chaoduoqian, 'stop': stopProcess, "time": 600, 'count': 0}
     ],
     "跑任务": [
-        {'name': '跑任务', "process": lookBaoXiang, "time": 6000, "delay": 0, 'count': 0}
+        {'name': '跑任务', "process": lookBaoXiang, 'stop': stopProcess, "time": 6000, "delay": 0, 'count': 0}
     ],
     "逛街": [
-        {'name': '跑任务', "desc": "浏览低价", "process": guangjie, "time": 1, "delay": 0, 'count': 0}
+        {'name': '逛街', "process": guangjie, 'stop': stopProcess, "time": 1, "delay": 0, 'count': 0}
     ],
     "吃饭打卡": [
-        {'name': '吃饭打卡', "desc": "打卡领吃饭补贴", "process": chifandaka, "time": 600, "delay": 0, 'count': 0}
+        {'name': '吃饭打卡', "process": chifandaka, 'stop': stopProcess, "time": 600, "delay": 0, 'count': 0}
     ],
     "看视频": [
-        {'name': '看视频', "process": lookShortVideo, "time": 600, 'count': 0}
+        {'name': '看视频', "process": douyinLookShortVideo, "time": 600, 'count': 0}
     ],
     "双倍奖励": [
-        {'name': '看视频', "desc": "双重奖励", "process": double, "time": 600, 'count': 0}
+        {'name': '双倍奖励', "process": double, 'stop': stopProcess, "time": 600, 'count': 0}
     ],
     "指定视频": [
-        {'name': '看视频', "desc": "做任务最高", "process": zhiding, "time": 600, 'count': 0}
+        {'name': '指定视频', "process": zhiding, 'stop': stopProcess, "time": 600, 'count': 0}
+    ],
+    "看直播": [
+        {'name': '看直播', "desc": "看直播", "process": kanzhibo, 'stop': stopProcess, "time": 1, 'count': 0}
     ],
     "签到": [
-        {'name': '签到', "process": qiandao, "time": 1, 'count': 0}
+        {'name': '签到', "process": qiandao, 'stop': stopProcess, "time": 1, 'count': 0}
+    ],
+    "签到视频": [
+        {'name': '签到视频', "process": qiandaoshipin, 'stop': stopProcess, "time": 600, 'count': 0}
     ]
 }
 

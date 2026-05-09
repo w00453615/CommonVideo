@@ -9,8 +9,6 @@ from ..util import swipeUp, swipe, register, forWait, clickNodeP, lookGuangGao, 
   ocrFind, findWaitBack, WAIT_LOW, WAIT_HIGH, swipeBackApp, extract_first_num_to_int, swipeBackOnes
 
 def lookBaoXiang(paras, x, y):
-  clickXY(x, y)
-
   time.sleep(2 + random())
   x, y, text = ocrFindText("看视频最高")
   if x is not None:
@@ -84,8 +82,8 @@ node = {
 
 step = [
   {'name':'看视频', "path" : ['text:首页']},
-  {'name': '看短剧赚金币', "path": ['ocr:赚钱']},
-  {'name': '宝箱', "path": ['ocr:赚钱']},
+  {'name': '看短剧赚金币', "path": ['text:赚钱']},
+  {'name': '宝箱', "path": ['text:赚钱']},
   # {"start": "看短剧赚金币", 'name':'看短剧赚金币', "path" : ['text:赚钱']}
 ]
 
