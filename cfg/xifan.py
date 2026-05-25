@@ -5,9 +5,9 @@ from random import randint, random
 from ascript.android import action
 from ascript.android.action import click
 
-from ..util import swipeDown, swipeUp, swipe, register, forWait, clickNodeP, lookGuangGao, lookShortVideo, clickNode, clickXY, \
+from ..util import swipeDown, swipeDownTo, swipe, register, forWait, clickNodeP, lookGuangGao, lookShortVideo, clickNode, clickXY, \
     findImageAndClick, imageFind, descFind, swipeBack, ocrFind, swipeBackApp, ocrFindText, extract_first_num_to_int, \
-    swipeBackOnes, findWaitBack, findTextAndClick, findText, textFind
+    swipeBackOnes, findWaitBack, findTextAndClick, findText, textFind, wait_with_jitter
 from ascript.android.screen import capture, FindColors, FindImages, Ocr
 from ascript.android.system import R
 
@@ -111,7 +111,7 @@ def lookGuangGaoOnes(paras, x, y):
     print('放弃', x)
     if x is not None:
         clickXY(x, y)
-    time.sleep(2)
+    wait_with_jitter(2)
 
     time.sleep(3 + random())
     text = findText("s后")
@@ -130,9 +130,9 @@ def lookGuangGaoOnes(paras, x, y):
     print('已成功', text)
     if text is not None:
         swipeBackOnes()
-        time.sleep(2)
+        wait_with_jitter(2)
 
-    # time.sleep(2)
+    # wait_with_jitter(2)
     # x, y = textFind("立即")
     # print('立即', x)
     # if x is not None:
@@ -156,7 +156,7 @@ def lookGuangGaoOnes(paras, x, y):
             return 0
         else:
             return 0
-    time.sleep(2)
+    wait_with_jitter(2)
 
     text = findText('领现金|托盘')
     print('领现金', text)
@@ -187,9 +187,25 @@ def stopProcess():
     print('stopProcess')
     swipeBackApp('金币(凌晨自动兑现)', 'text')
 
+    # 尝试读取金币数
+    gold_coins = 0
+    try:
+        # 使用OCR识别金币数字（示例实现）
+        gold_text = findText(r'(\d+(?:,\d+)*)')
+        if gold_text:
+            # 移除逗号并转成数字
+            num_str = gold_text.replace(',', '')
+            if num_str.isdigit():
+                gold_coins = int(num_str)
+                print(f'获取到金币数: {gold_coins}')
+    except Exception as e:
+        print(f'读取金币数失败: {e}')
+
     for _ in range(4):
         swipeDown(0.2, 0.7)
         time.sleep(0.5+random())
+    
+    return gold_coins
         
 step = [
     {'name': '看视频', "path": ["text:首页"]},

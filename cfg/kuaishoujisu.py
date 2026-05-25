@@ -4,7 +4,7 @@ from random import randint
 from ascript.android import action
 from ascript.android.action import click
 
-from ..util import swipeBackOnes, swipeUp, swipe, register, forWait, clickNodeP, lookGuangGao, lookShortVideo, clickNode, clickXY, \
+from ..util import WAIT_HIGH, WAIT_LOW, findText, findTextAndClick, findWaitBack, swipeBackOnes, swipeUp, swipe, register, forWait, clickNodeP, lookGuangGao, lookShortVideo, clickNode, clickXY, \
     findImageAndClick, imageFind, descFind, swipeBack, findDesc, textFind, swipeBackApp, ocrFind, wait_with_jitter
 from ascript.android.screen import capture, FindColors, FindImages, Ocr
 from ascript.android.system import R
@@ -20,41 +20,6 @@ def jinBiPos():
         logger.info("没找到金币")
 
     return [880, 420, 1048, 588]
-
-def lookXiFanGuangGao(paras, x, y):
-    clickXY(x, y)
-    time.sleep(randint(35, 50))
-
-    action.Key.back()
-    # 点击继续观看
-    while True:
-        if findImageAndClick("抖音极速版/评论并收下金币.png", 1) is not None:
-            time.sleep(randint(5, 10))
-            if findImageAndClick("抖音极速版/看广告赚金币.png", 1) is not None:
-                break
-
-        if findImageAndClick("抖音极速版/领取奖励.png", 1) is not None:
-            continue
-        if findImageAndClick("抖音极速版/继续观看.png", 1)is not None:
-            continue
-        if findImageAndClick("抖音极速版/立即打开.png", 1)is not None:
-            time.sleep(randint(35, 50))
-            swipeBack('领取成功')
-            action.Key.back()
-            continue
-        if findImageAndClick("抖音极速版/立即下载.png", 1)is not None:
-            time.sleep(randint(35, 50))
-            swipeBack('领取成功')
-            action.Key.back()
-            continue
-
-        if descFind('领取成功'):
-            action.Key.back()
-            continue
-
-        time.sleep(randint(35, 50))
-        action.Key.back()
-
 
 def qiandao(paras, x, y):
     logger.info('qiandao')
@@ -72,14 +37,14 @@ def qiandao(paras, x, y):
 
     wait_with_jitter(2)
     x, y = textFind('广告完成任务')
-    logger.info(f'qiandao 广告完成任务 {x}')
+    print('qiandao 广告完成任务', x)
     if x is not None:
         clickXY(x, y)
     else:
         return -1
     wait_with_jitter(1)
     x, y = textFind('去看广告')
-    logger.info(f'qiandao 去看广告 {x}')
+    print('qiandao 去看广告', x)
     if x is not None:
         clickXY(x, y)
 
@@ -88,7 +53,7 @@ def qiandao(paras, x, y):
     return 0
 
 def qiandaoshipin(paras, x, y):
-    logger.info('qiandaoshipin')
+    print('qiandaoshipin')
 
     #看视频xxxxxxxxxxxx
 
@@ -96,8 +61,8 @@ def qiandaoshipin(paras, x, y):
     logger.info(f'完成去观看打卡 {x}, {y}')
     clickXY(x, y)
     wait_with_jitter(2)
-def swipeBackAppKuaiShouGuangGao():
-    swipeBackApp('秒后|领取成功', 'text')
+def swipeBackAppKuaiShoujisuGuangGao():
+    swipeBackApp('s后|成功领取', 'text')
 
 def procKeyword():
     keyword = list()
@@ -117,17 +82,18 @@ def procKeyword():
     keyword.append('一键')
     keyword.append('速来')
     keyword.append('抢先')
+    keyword.append('免费')
     for it in keyword:
-        x, _ = findWaitBack(it, '秒后|领取成功', 'desc')
+        x, _ = findWaitBack(it, 's后|成功领取', 'text')
         if x is not None:
             break
-        else:
-            swipeBackAppKuaiShouGuangGao()
+        
+    swipeBackAppKuaiShoujisuGuangGao()
 
 def kanguanggao(paras, x, y):
     logger.info('kanguanggao')
 
-    text = findDesc("s后")
+    text = findText("s后")
     logger.info(f's后可领取奖励 {text}')
     if text is not None:
         procKeyword()
@@ -136,7 +102,7 @@ def kanguanggao(paras, x, y):
         logger.info(f'自动进入活动 等待 {t}')
         time.sleep(t)
     
-    text = findDesc("s后")
+    text = findText("s后")
     logger.info(f's后可领奖励 {text}')
     if text is not None:
         leftStr = extract_first_num_to_int(text)
@@ -148,12 +114,9 @@ def kanguanggao(paras, x, y):
 
     swipeBackOnes()
     
-    time.sleep(2+random())
-    
-    x, y = textFind("^领取奖励")
-    logger.info(f'领取奖励 {x}, {y}')
-    if x is not None:
-        clickXY(x, y)
+    result = findTextAndClick("领取奖励")
+    if result is not None:
+        logger.info(f'领取奖励 成功')
         return 0
 
     x, y = textFind("看广告得金币")
@@ -164,16 +127,16 @@ def kanguanggao(paras, x, y):
     
 
 def stopProcess():
-    logger.info('stopProcess')
+    print('stopProcess')
     swipeBackApp('首页', 'ocr')
     
     return 0
 
 step = [
     {'name': '看视频', "path": []},
-    {'name': '签到', "display":"Falsee", "path": ['id:com.smile.gifmaker:id/kem_task_pendant_new', 'ocr:连续打卡']},
-    {'name': '看广告', "display":"True", "path": ['id:com.smile.gifmaker:id/kem_task_pendant_new', 'text:看广告得金币']},
-    {'name': '签到视频', "display":"True", "path": ['id:com.smile.gifmaker:id/kem_task_pendant_new', 'text:看广告得金币']}
+    # {'name': '签到', "display":"Falsee", "path": ['id:com.smile.gifmaker:id/kem_task_pendant_new', 'ocr:连续打卡']},
+    {'name': '看广告', "display":"True", "path": ['ocr:去赚钱', 'text:看广告得金币']},
+    {'name': '跑任务', "display":"True", "path": []}
 ]
 
 node = {
@@ -190,15 +153,17 @@ node = {
     "看广告": [
         {'name': '看广告', "process": kanguanggao, "time": 600, 'count': 0}
     ],
+    "跑任务": [
+        {'name': '跑任务', "process": kanguanggao, "time": 600, 'count': 0}
+    ],
     "签到视频": [
         {'name': '签到视频', "process": qiandaoshipin, "time": 600, 'count': 0}
     ]
 }
 
 cfg = {
-    # "app": "com.kuaishou.nebula",
-    "app": "com.smile.gifmaker",
-    'name': '快手',
+    "app": "com.kuaishou.nebula",
+    'name': '快手极速',
     "step": step,
     "node": node
 }

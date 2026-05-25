@@ -16,6 +16,7 @@ from ascript.android.system import R
 
 from .cfg.douyin import lookDouyinGuangGaoOnes
 from .cfg import kuaishou
+from .cfg import kuaishoujisu
 from .cfg import baidu
 from .cfg import xifan
 from .ui import ui
@@ -33,10 +34,11 @@ print("Hello AS!")
 
 register(douyin.cfg)
 register(kuaishou.cfg)
+register(kuaishoujisu.cfg)
 # register(baidu.cfg)
 # register(hongguo.cfg)
 register(xifan.cfg)
-register(hongguo.cfg)
+# register(hongguo.cfg)
 
 ui.show(util.procList)
 # process()

@@ -121,6 +121,7 @@ def mission(v):
 
     result_dict = json.loads("""{
   "抖音极速版": [
+    "开始",
     "看广告",
     "逛街",
     "双倍奖励",
@@ -145,12 +146,11 @@ def qiandao(v):
     w.close()
 
     result_dict = json.loads("""{
-  "快手": [
-    "签到"
-  ],
   "抖音极速版": [
-    "签到"
+    "签到",
+    "签到视频"
   ]
+  
 }""")
     print('qiandao result_dict', result_dict)
     process(result_dict)

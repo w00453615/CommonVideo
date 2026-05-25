@@ -1,0 +1,7 @@
+{
+    "log_level": "INFO",
+    "enable_alicloud": true,
+    "upload_interval": 60,
+    "alicloud_folder_id": "root",
+    "refresh_token": "f766054e7d484b30a10e666d1da8d752"
+}
